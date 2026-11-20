@@ -50,6 +50,13 @@ if (SMOKE) {
   app.commandLine.appendSwitch('use-fake-ui-for-media-stream');
 }
 
+// Linux: screen and window capture goes through the desktop portal and PipeWire (Wayland and X11).
+// Without this Chromium lists no sources and the recording screen stays empty.
+if (process.platform === 'linux') {
+  app.commandLine.appendSwitch('enable-features', 'WebRTCPipeWireCapturer');
+  app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
+}
+
 if (!SMOKE && !CODEC_PROBE && !app.requestSingleInstanceLock()) app.quit();
 // Windows: Microsoft's d3dcompiler_47.dll ships as "d3dcompiler_47.dll.terms-pending" and gets its
 // real name only after its terms are accepted (windows-terms.ts), so no process can load the

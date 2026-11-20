@@ -507,4 +507,5 @@ export const EN: Record<string, string> = {
   "Koşullar dosyası açılamadı": "Could not open the terms file",
   "Ekran kaydı izni yok. Sistem Ayarları › Gizlilik ve Güvenlik › Ekran ve Sistem Ses Kaydı bölümünde Zeyvola'yı açın, sonra Zeyvola'yı yeniden başlatın. Zeyvola listede açık görünüyorsa (ör. bir güncellemeden sonra), onu \"–\" ile listeden kaldırıp yeniden izin verin.": "No screen recording permission. Turn on Zeyvola in System Settings › Privacy & Security › Screen & System Audio Recording, then restart Zeyvola. If Zeyvola already looks turned on there (for example after an update), remove it from the list with \"–\" and allow it again.",
   "Yeniden başlat": "Restart",
+  "Kaynak bulunamadı. Linux'ta ekran paylaşımı için xdg-desktop-portal ve PipeWire gerekir; açılan paylaşım penceresinde ekranı seçin, ardından listeyi yenileyin.": "No sources found. On Linux, screen sharing needs xdg-desktop-portal and PipeWire; choose the screen in the sharing dialog that opens, then refresh the list.",
 };

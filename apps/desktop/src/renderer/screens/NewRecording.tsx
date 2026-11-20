@@ -206,8 +206,10 @@ export function NewRecording(props: { initialKind?: Kind; onBack: () => void; on
             <div className="note is-warning"><Icon name="warning" size={14} />
               {perms?.screen === 'denied'
                 ? t("Ekran kaydı izni yok. Sistem Ayarları › Gizlilik ve Güvenlik › Ekran ve Sistem Ses Kaydı bölümünde Zeyvola'yı açın, sonra Zeyvola'yı yeniden başlatın. Zeyvola listede açık görünüyorsa (ör. bir güncellemeden sonra), onu \"–\" ile listeden kaldırıp yeniden izin verin.")
-                : t("Kaynak bulunamadı. macOS'ta Sistem Ayarları › Gizlilik ve Güvenlik › Ekran Kaydı bölümünden izin vermeniz gerekebilir.")}
-              <button type="button" className="link" onClick={() => api.openPermissionSettings('screen')}>{t("Ayarları aç")}</button>
+                : api.platform() === 'linux'
+                  ? t("Kaynak bulunamadı. Linux'ta ekran paylaşımı için xdg-desktop-portal ve PipeWire gerekir; açılan paylaşım penceresinde ekranı seçin, ardından listeyi yenileyin.")
+                  : t("Kaynak bulunamadı. macOS'ta Sistem Ayarları › Gizlilik ve Güvenlik › Ekran Kaydı bölümünden izin vermeniz gerekebilir.")}
+              {api.platform() !== 'linux' && <button type="button" className="link" onClick={() => api.openPermissionSettings('screen')}>{t("Ayarları aç")}</button>}
               {perms?.screen === 'denied' && <button type="button" className="link" onClick={() => void api.relaunch()}>{t("Yeniden başlat")}</button>}
             </div>
           )}

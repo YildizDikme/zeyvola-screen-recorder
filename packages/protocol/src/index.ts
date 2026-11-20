@@ -269,7 +269,7 @@ export const Schemas = {
   'export:write': ExportWrite,
   'export:end': z.object({ exportId: z.string().min(8).max(80), cancel: z.boolean().default(false) }),
   'shell:showItem': z.object({ path: z.string().min(1).max(4096) }),
-  'settings:set': z.object({ language: z.enum(['auto', 'tr', 'en']) }),
+  'settings:set': z.object({ language: z.enum(['auto', 'tr', 'en', 'pt']) }),
   'media:importVideo': z.object({ id: ProjectId, token: z.string().regex(/^pick_[a-f0-9]{16}$/) }),
   'media:discardImport': z.object({ id: ProjectId, recordingId: z.string().regex(/^imp_[a-f0-9]{12}$/) }),
   'capture:dismissRecovery': z.object({ recordingId: z.string().regex(/^rec_[A-Za-z0-9-]{8,64}$/) }),

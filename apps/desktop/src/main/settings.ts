@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { app } from 'electron';
-import { DEFAULT_SETTINGS, resolveLang, translate, type AppSettings, type Lang, type Params, type SettingsInfo } from '../shared/i18n';
+import { DEFAULT_SETTINGS, LANGS, resolveLang, translate, type AppSettings, type Lang, type Params, type SettingsInfo } from '../shared/i18n';
 import { writeFileAtomic } from './fsutil';
 
 let settings: AppSettings = { ...DEFAULT_SETTINGS };
@@ -31,7 +31,8 @@ export async function loadSettings(opts: { ephemeral?: boolean; language?: AppSe
   if (!ephemeral) {
     try {
       const raw = JSON.parse(await readFile(file(), 'utf8')) as Partial<AppSettings>;
-      if (raw.language === 'auto' || raw.language === 'tr' || raw.language === 'en') settings = { ...settings, language: raw.language };
+      const saved = LANGS.find((l) => l === raw.language);
+      if (saved || raw.language === 'auto') settings = { ...settings, language: saved ?? 'auto' };
       const folder = (raw as { lastExportFolder?: unknown }).lastExportFolder;
       if (typeof folder === 'string' && isAbsolute(folder)) lastExportFolder = folder;
     } catch { /* first run: defaults */ }

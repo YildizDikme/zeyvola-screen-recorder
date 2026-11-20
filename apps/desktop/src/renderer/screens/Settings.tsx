@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { AppInfo, BackendInfo, PermissionInfo } from '@zeyvola/protocol';
 import { APP_NAME, COPYRIGHT, DEVELOPER, DEVELOPER_ROLE, LICENSE_NAME, SOURCE_URL } from '../../shared/brand';
-import type { LangSetting, SettingsInfo } from '../../shared/i18n';
+import { LANG_NAMES, type LangSetting, type SettingsInfo } from '../../shared/i18n';
 import { api } from '../api';
 import { Badge, Button, Kbd, Segmented } from '../ui/controls';
 import { Icon } from '../ui/icons';
@@ -36,12 +36,13 @@ function LanguageSection() {
           onChange={(language) => void api.setLanguage(language).then(setS)}
           options={[
             { value: 'auto', label: t("Otomatik") },
-            { value: 'tr', label: 'Türkçe' },
-            { value: 'en', label: 'English' },
+            { value: 'tr', label: LANG_NAMES.tr },
+            { value: 'en', label: LANG_NAMES.en },
+            { value: 'pt', label: LANG_NAMES.pt },
           ]} />
         <p className="muted small">
           {system ? t("Bilgisayarın dili: {name}", { name: languageName(system) }) : t("Bilgisayarın dili algılanamadı.")}
-          {s.language === 'auto' && <> · {t("Otomatik seçim: {lang}", { lang: s.resolved === 'tr' ? 'Türkçe' : 'English' })}</>}
+          {s.language === 'auto' && <> · {t("Otomatik seçim: {lang}", { lang: LANG_NAMES[s.resolved] })}</>}
         </p>
       </div>
     </section>

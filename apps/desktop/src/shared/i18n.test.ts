@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { resolveLang, translate } from './i18n';
 import { EN } from './i18n-en';
+import { PT } from './i18n-pt';
 
 /** Strings that read the same in both languages (codec names, units). */
 const SAME = new Set(['Zeyvola', 'H.264', 'VP9', 'VP8', '30 fps', '60 fps', '1080p', '4K', 'MP4 · H.264', 'MP4 · VP9', 'WebM · VP9', 'WebM · VP8', 'Format', 'Zoom', 'V / Esc']);
@@ -34,7 +35,9 @@ describe('i18n', () => {
     expect(resolveLang('auto', ['tr-TR', 'en-US'])).toBe('tr');
     expect(resolveLang('auto', ['en-GB'])).toBe('en');
     expect(resolveLang('auto', ['de-DE', 'tr-TR'])).toBe('en');
+    expect(resolveLang('auto', ['pt-BR', 'en-US'])).toBe('pt');
     expect(resolveLang('auto', [])).toBe('en');
+    expect(resolveLang('pt', ['en-US'])).toBe('pt');
     expect(resolveLang('tr', ['en-US'])).toBe('tr');
     expect(resolveLang('en', ['tr-TR'])).toBe('en');
   });
@@ -42,6 +45,7 @@ describe('i18n', () => {
   it('fills placeholders and falls back to Turkish', () => {
     expect(translate('en', 'Kayıt {n} saniye içinde başlıyor', { n: 3 })).toBe('Recording starts in 3 seconds');
     expect(translate('tr', 'Kayıt {n} saniye içinde başlıyor', { n: 3 })).toBe('Kayıt 3 saniye içinde başlıyor');
+    expect(translate('pt', 'Kayıt {n} saniye içinde başlıyor', { n: 3 })).toBe('A gravação começa em 3 segundos');
     expect(translate('en', 'çeviri yok')).toBe('çeviri yok');
   });
 
@@ -50,8 +54,15 @@ describe('i18n', () => {
     expect(missing).toEqual([]);
   });
 
-  it('keeps the same placeholders in both languages', () => {
-    const broken = Object.entries(EN).filter(([tr, en]) => params(tr).join() !== params(en).join()).map(([tr]) => tr);
-    expect(broken).toEqual([]);
+  it('has a Portuguese entry for every string in the app', () => {
+    const missing = usedKeys().filter((k) => !(k in PT) && !SAME.has(k));
+    expect(missing).toEqual([]);
+  });
+
+  it('keeps the same placeholders in every language', () => {
+    for (const dict of [EN, PT]) {
+      const broken = Object.entries(dict).filter(([tr, tx]) => params(tr).join() !== params(tx).join()).map(([tr]) => tr);
+      expect(broken).toEqual([]);
+    }
   });
 });
