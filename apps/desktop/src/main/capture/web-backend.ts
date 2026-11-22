@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import { appendFileSync } from 'node:fs';
 import { open, type FileHandle } from 'node:fs/promises';
 import { join } from 'node:path';
-import { desktopCapturer, screen, type BrowserWindow, type IpcMainInvokeEvent } from 'electron';
+import { desktopCapturer, screen, type BrowserWindow, type DesktopCapturerSource, type IpcMainInvokeEvent } from 'electron';
 import type { MediaSource, SourceKind } from '@zeyvola/project-model';
 import { msToTicks } from '@zeyvola/timing';
 import { displayAspectFor } from '../../shared/display-frame';
@@ -31,6 +31,53 @@ interface OpenFile {
 }
 
 type TrackMeta = { firstFrameMs: number | null; width?: number; height?: number; fps?: number; sampleRate?: number; channels?: number };
+
+/**
+ * Linux (portal/PipeWire): Chromium opens one portal session per source type, and a second
+ * session cancels the first, so the picker closes by itself. Ask for screens only there.
+ */
+export const SOURCE_TYPES: ('screen' | 'window')[] = process.platform === 'linux' ? ['screen'] : ['screen', 'window'];
+
+/**
+ * Matches a selected source against available desktop capturer sources.
+ * On Linux (Wayland / PipeWire portal), Chromium generates IDs like "screen:<session>:<stream>:s"
+ * or "window:<session>:<id>:w" where the session counter increments with each getSources call
+ * (e.g. "screen:1:0:s" during listSources, "screen:2:0:s" during doPrepare).
+ */
+export function findMatchingSource(
+  sources: DesktopCapturerSource[],
+  target: { kind: string; sourceId: string; displayId?: string; label?: string },
+): DesktopCapturerSource | undefined {
+  // 1. Direct ID match (macOS, Windows, X11)
+  const exact = sources.find((s) => s.id === target.sourceId);
+  if (exact) return exact;
+
+  // 2. Normalized session index match for Linux portal
+  const normalize = (id: string) => id.replace(/^(screen|window):\d+(:.*)$/, '$1:*$2');
+  const targetNorm = normalize(target.sourceId);
+  const normalizedMatch = sources.find((s) => normalize(s.id) === targetNorm);
+  if (normalizedMatch) return normalizedMatch;
+
+  // 3. Match by displayId if present
+  if (target.displayId) {
+    const byDisplay = sources.find((s) => s.display_id === target.displayId);
+    if (byDisplay) return byDisplay;
+  }
+
+  // 4. Match by label / name
+  if (target.label) {
+    const byLabel = sources.find((s) => s.name === target.label);
+    if (byLabel) return byLabel;
+  }
+
+  // 5. Fallback by kind (display/region -> screen source; window -> window source)
+  const isScreen = target.kind === 'display' || target.kind === 'region';
+  const byKind = sources.find((s) => (isScreen ? s.id.startsWith('screen:') : s.id.startsWith('window:')));
+  if (byKind) return byKind;
+
+  // 6. Last resort fallback
+  return sources[0];
+}
 
 const EXT: Record<string, string> = { mp4: 'mp4', webm: 'webm', 'x-matroska': 'mkv' };
 
@@ -102,9 +149,10 @@ export class WebCaptureBackend extends EventEmitter implements CaptureBackend {
     this.args = args;
     this.markers = [];
     await this.startInput(args);
-    const sources = await desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 0, height: 0 } });
-    const src = sources.find((s) => s.id === args.config.target.sourceId);
+    const sources = await desktopCapturer.getSources({ types: SOURCE_TYPES, thumbnailSize: { width: 0, height: 0 } });
+    const src = findMatchingSource(sources, args.config.target);
     if (!src) throw new Error(tm("Seçilen kaynak artık mevcut değil."));
+    args.config.target.sourceId = src.id;
     const win = this.createWindow();
     this.win = win;
     const loopback = args.config.systemAudio && process.platform === 'win32';

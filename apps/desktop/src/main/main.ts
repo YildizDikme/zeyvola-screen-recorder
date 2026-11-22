@@ -50,12 +50,19 @@ if (SMOKE) {
   app.commandLine.appendSwitch('use-fake-ui-for-media-stream');
 }
 
+// Linux: screen and window capture goes through the desktop portal and PipeWire (Wayland and X11).
+// Without this Chromium lists no sources and the recording screen stays empty.
+if (process.platform === 'linux') {
+  app.commandLine.appendSwitch('enable-features', 'WebRTCPipeWireCapturer');
+  app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
+}
+
 if (!SMOKE && !CODEC_PROBE && !app.requestSingleInstanceLock()) app.quit();
 // Windows: Microsoft's d3dcompiler_47.dll ships as "d3dcompiler_47.dll.terms-pending" and gets its
 // real name only after its terms are accepted (windows-terms.ts), so no process can load the
 // shipped copy before. Accepted earlier (an update brought the pending name again): rename it now,
 // before the app is ready, and restart once. If that fails the app starts as it is and says so.
-const TERMS_ACTION = SMOKE || CODEC_PROBE ? 'none' : startupAction(process.platform, dllFiles(), termsAccepted(app.getPath('userData')));
+const TERMS_ACTION = SMOKE || CODEC_PROBE || process.platform !== 'win32' ? 'none' : startupAction(process.platform, dllFiles(), termsAccepted(app.getPath('userData')));
 const TERMS_PENDING = TERMS_ACTION === 'ask';
 const ACTIVATION = TERMS_ACTION === 'activate' ? activateDll() : null;
 const RESTART_FOR_DLL = ACTIVATION?.ok === true;

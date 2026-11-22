@@ -19,6 +19,7 @@
     "build": "pnpm run build:main && pnpm run build:renderer && pnpm run build:licenses",
     "dev": "pnpm run build && pnpm run start",
     "start": "node scripts/start.mjs",
+    "package:deb": "node scripts/package-deb.mjs",
     "smoke": "pnpm run build && electron . --smoke"
   },
   "dependencies": {
