@@ -11,7 +11,7 @@ import type { ProbedFile } from './helper-client';
 import { NativeMacBackend } from './native-macos';
 import { parseSessionLog, recoverAbandoned, recoverFolder, SESSION_FILE, type FolderResult, type ProjectEntry, type RecoveryDeps } from './recovery';
 import { RecorderCrash, type CaptureBackend } from './types';
-import { WebCaptureBackend } from './web-backend';
+import { SOURCE_TYPES, WebCaptureBackend } from './web-backend';
 import { probeWebmFolder } from './webm-probe';
 
 export interface ManagerDeps {
@@ -77,7 +77,7 @@ export class CaptureManager extends EventEmitter {
     const displays = screen.getAllDisplays();
     const primaryId = String(screen.getPrimaryDisplay().id);
     const isPrimary = (s: SourceInfo) => s.kind === 'display' && s.displayId === primaryId;
-    const sources = await desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 480, height: 300 }, fetchWindowIcons: true });
+    const sources = await desktopCapturer.getSources({ types: SOURCE_TYPES, thumbnailSize: { width: 480, height: 300 }, fetchWindowIcons: true });
     return sources.map((s): SourceInfo => {
       const isScreen = s.id.startsWith('screen:');
       const d = isScreen ? displays.find((x) => String(x.id) === s.display_id) ?? displays[0] : undefined;

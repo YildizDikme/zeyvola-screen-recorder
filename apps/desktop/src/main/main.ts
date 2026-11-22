@@ -62,7 +62,7 @@ if (!SMOKE && !CODEC_PROBE && !app.requestSingleInstanceLock()) app.quit();
 // real name only after its terms are accepted (windows-terms.ts), so no process can load the
 // shipped copy before. Accepted earlier (an update brought the pending name again): rename it now,
 // before the app is ready, and restart once. If that fails the app starts as it is and says so.
-const TERMS_ACTION = SMOKE || CODEC_PROBE ? 'none' : startupAction(process.platform, dllFiles(), termsAccepted(app.getPath('userData')));
+const TERMS_ACTION = SMOKE || CODEC_PROBE || process.platform !== 'win32' ? 'none' : startupAction(process.platform, dllFiles(), termsAccepted(app.getPath('userData')));
 const TERMS_PENDING = TERMS_ACTION === 'ask';
 const ACTIVATION = TERMS_ACTION === 'activate' ? activateDll() : null;
 const RESTART_FOR_DLL = ACTIVATION?.ok === true;

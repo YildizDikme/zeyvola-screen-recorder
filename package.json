@@ -26,6 +26,7 @@
     "test": "node tools/check-boundaries.mjs && vitest run",
     "licenses": "node tools/license-inventory.mjs",
     "package": "node apps/desktop/scripts/package.mjs",
+    "package:deb": "node apps/desktop/scripts/package-deb.mjs",
     "codec-audit": "node tools/codec-audit.mjs",
     "native:mac": "bash native/recorder-macos/build.sh",
     "native:input": "bash native/input-macos/build.sh",

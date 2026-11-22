@@ -18,7 +18,11 @@ const require = createRequire(import.meta.url);
 
 if (process.platform !== 'darwin') {
   const electron = require('electron');
-  spawn(electron, [appDir], { stdio: 'inherit' }).on('exit', (code) => process.exit(code ?? 0));
+  const args = [appDir, ...process.argv.slice(2)];
+  spawn(electron, args, {
+    stdio: 'inherit',
+    env: { ...process.env, ELECTRON_DISABLE_SANDBOX: process.env.ELECTRON_DISABLE_SANDBOX ?? '1' },
+  }).on('exit', (code) => process.exit(code ?? 0));
 } else {
   const electronApp = resolve(dirname(require.resolve('electron/package.json')), 'dist', 'Electron.app');
   const electronVersion = JSON.parse(readFileSync(require.resolve('electron/package.json'), 'utf8')).version;
